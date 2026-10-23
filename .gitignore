@@ -1,0 +1,25 @@
+# Dependencies and build output
+node_modules/
+.expo/
+dist/
+web-build/
+.wrangler/
+*.tsbuildinfo
+/echo-journal/ios
+/echo-journal/android
+
+# Secrets: never commit. Groq/Supabase secret keys live in Cloudflare (wrangler secret put).
+.env
+.env*.local
+.dev.vars
+*.pem
+*.p8
+*.p12
+*.key
+*.jks
+*.mobileprovision
+
+# OS / logs
+.DS_Store
+npm-debug.*
+*.log

@@ -1,0 +1,16 @@
+{
+  "name": "echo-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "observability": { "enabled": true },
+  // Public values (the anon key ships in the app too). Fill these in from
+  // Supabase → Project Settings → API. GROQ_API_KEY is a secret, set via `wrangler secret put`.
+  // Per-user limit enforced by Cloudflare across all isolates (in addition to the in-memory hourly cap).
+  "ratelimits": [
+    { "name": "USER_LIMITER", "namespace_id": "1001", "simple": { "limit": 30, "period": 60 } }
+  ],
+  "vars": {
+    "SUPABASE_URL": "https://okvwlzidluewpqqivpkp.supabase.co",
+    "SUPABASE_ANON_KEY": "sb_publishable_lHjPjY9CYx7dK24_z69J0g_a1604OFQ"
+  }
+}
