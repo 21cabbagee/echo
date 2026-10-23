@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 import { File } from 'expo-file-system';
 import type { Entry } from './db';
+import { aiAllowed } from './settings';
 import { getAccessToken, supabase } from './supabase';
 
 // All AI work goes through the Echo API (../echo-api), which holds the Groq key.
@@ -23,7 +24,9 @@ export const API_URL = resolveApiUrl();
 export class AiError extends Error {}
 
 /** Calls the Echo API as the signed-in user. Retries once after refreshing an expired session. */
-async function api<T>(path: string, init: RequestInit, retried = false): Promise<T> {
+async function api<T>(path: string, init: RequestInit, retried = false, needsAiConsent = true): Promise<T> {
+  // Nothing is sent to the AI provider without the user's explicit permission.
+  if (needsAiConsent && !aiAllowed()) throw new AiError('AI features are off. You can turn them on in Settings.');
   if (!API_URL) throw new AiError('No AI server configured. Set EXPO_PUBLIC_API_URL.');
   const token = await getAccessToken();
   if (!token) throw new AiError('Sign in to use AI features.');
@@ -39,7 +42,7 @@ async function api<T>(path: string, init: RequestInit, retried = false): Promise
   }
   if (res.status === 401 && !retried) {
     const { error } = await supabase.auth.refreshSession();
-    if (!error) return api<T>(path, init, true);
+    if (!error) return api<T>(path, init, true, needsAiConsent);
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new AiError(data.error ?? `AI server error ${res.status}.`);
@@ -51,7 +54,7 @@ const postJson = <T>(path: string, body: unknown) =>
 
 /** Permanently deletes the signed-in user's account on the server. */
 export async function deleteAccount(): Promise<void> {
-  await api<{ deleted: boolean }>('/v1/account', { method: 'DELETE' });
+  await api<{ deleted: boolean }>('/v1/account', { method: 'DELETE' }, false, false);
 }
 
 export async function checkHealth(): Promise<boolean> {

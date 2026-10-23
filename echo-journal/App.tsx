@@ -8,7 +8,8 @@ import * as Notifications from 'expo-notifications';
 import { configureNotifications } from './src/reminders';
 import { useAuthDeepLinks, useSession } from './src/supabase';
 import { AuthScreen } from './src/screens/AuthScreen';
-import { useSettings } from './src/settings';
+import { ConsentScreen } from './src/screens/ConsentScreen';
+import { setAiConsent, useSettings } from './src/settings';
 import { colors } from './src/theme';
 import { TodayScreen } from './src/screens/TodayScreen';
 import { ReflectScreen } from './src/screens/ReflectScreen';
@@ -49,6 +50,7 @@ export default function App() {
     return () => sub.remove();
   }, []);
   const signedIn = !!session;
+  const aiOn = settings.aiConsent === 'granted';
 
   useEffect(() => { initDb().then(() => setReady(true)); }, []);
 
@@ -70,11 +72,11 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!ready || !signedIn) return;
+    if (!ready || !signedIn || !aiOn) return;
     sync();
     const sub = AppState.addEventListener('change', (s) => s === 'active' && sync());
     return () => sub.remove();
-  }, [ready, signedIn, sync]);
+  }, [ready, signedIn, aiOn, sync]);
 
   const onSettingsChanged = () => { settings.reload(); bump(); };
   const goSettings = () => { setOpenEntry(null); setTab('settings'); };
@@ -93,6 +95,22 @@ export default function App() {
         <StatusBar style="dark" />
         <SafeAreaView style={styles.root}>
           <AuthScreen />
+        </SafeAreaView>
+      </SafeAreaProvider>
+    );
+  }
+
+  if (settings.aiConsent === null) {
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <SafeAreaView style={styles.root}>
+          <ConsentScreen
+            onDecide={async (granted) => {
+              await setAiConsent(granted ? 'granted' : 'declined');
+              settings.reload();
+            }}
+          />
         </SafeAreaView>
       </SafeAreaProvider>
     );
@@ -117,7 +135,12 @@ export default function App() {
           ) : tab === 'reflect' ? (
             <ReflectScreen isPro={settings.isPro} refreshKey={refreshKey} onUpgrade={goSettings} />
           ) : (
-            <SettingsScreen email={session.user.email ?? ''} isPro={settings.isPro} onChanged={onSettingsChanged} />
+            <SettingsScreen
+              email={session.user.email ?? ''}
+              isPro={settings.isPro}
+              aiOn={aiOn}
+              onChanged={onSettingsChanged}
+            />
           )}
         </View>
         {openEntry == null && (

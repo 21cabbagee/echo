@@ -31,8 +31,25 @@ h2{font-size:22px;margin-top:32px}p.meta{color:#8A8178;margin-top:0}a{color:#C85
 <h2>What leaves your phone, and why</h2>
 <ul>
 <li><strong>Your email address</strong> is stored by our authentication provider (Supabase) so you can sign in. Sign-in codes are emailed through Resend.</li>
-<li><strong>A recording or entry text</strong> is sent over an encrypted connection to our server (hosted on Cloudflare) only when Echo transcribes it, scores its mood, writes a reflection or suggests a prompt. Our server passes it to our AI provider (Groq) to produce the result and returns it to your phone. Our server does not save your recordings or journal text.</li>
+<li><strong>A recording or entry text</strong>, only if you turn on AI features (Echo asks first, and you can switch them off anytime in Settings), is sent over an encrypted connection to our server (hosted on Cloudflare) when Echo transcribes it, scores its mood, writes a reflection or suggests a prompt. Our server passes it to our AI provider (Groq) to produce the result and returns it to your phone. Our server does not save your recordings or journal text.</li>
 <li><strong>Basic request logs</strong> (such as time, endpoint and error codes) may be kept by our hosting provider for operating and securing the service. We do not log the content of your entries.</li>
+</ul>
+
+<h2>Service providers</h2>
+<ul>
+<li><strong>Supabase</strong>: account and sign-in (your email address).</li>
+<li><strong>Resend</strong>: delivers sign-in emails.</li>
+<li><strong>Cloudflare</strong>: hosts Echo’s server.</li>
+<li><strong>Groq</strong>: the AI provider that transcribes and reflects, when AI features are on.</li>
+<li><strong>Google</strong>: only if you choose “Continue with Google” to sign in.</li>
+</ul>
+<p>They process data only to provide these services to Echo.</p>
+
+<h2>How long we keep things</h2>
+<ul>
+<li>Your account (email address and sign-in records) is kept until you delete your account.</li>
+<li>Recordings and journal text are not kept on our server; they exist only on your phone.</li>
+<li>Operational logs are kept for a short period (typically days) and then deleted.</li>
 </ul>
 
 <h2>What we never do</h2>
@@ -45,14 +62,17 @@ h2{font-size:22px;margin-top:32px}p.meta{color:#8A8178;margin-top:0}a{color:#C85
 <h2>Deleting your data</h2>
 <p>In Echo, open Settings → Delete account. This deletes your account from our authentication provider and erases all journal data on your device. You can also delete individual entries, or all local data, at any time.</p>
 
-<h2>Children</h2>
-<p>Echo is not intended for children under 13 (or the minimum age in your country).</p>
+<h2>Your rights</h2>
+<p>You can access, correct or delete your data, and withdraw consent for AI processing at any time (Settings → AI). Deleting your account removes your account data from our authentication provider. Depending on where you live, laws such as India’s Digital Personal Data Protection Act, 2023, or the EU/UK GDPR give you these rights and the right to complain to a data protection authority. To exercise them, contact us below.</p>
+
+<h2>Age</h2>
+<p>Echo is intended for people aged 18 and over.</p>
 
 <h2>Changes</h2>
 <p>If this policy changes, we will update the date above and, for significant changes, tell you in the app.</p>
 
 <h2>Contact</h2>
-<p>${contactLine}</p>
+<p>${contactLine} We aim to respond within 30 days.</p>
 </main></body></html>`;
 
   return new Response(html, {

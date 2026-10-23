@@ -103,10 +103,16 @@ Then put that URL in `echo-journal/.env.local` as `EXPO_PUBLIC_API_URL=...` and 
 
 `python3 scripts/make-icons.py` regenerates `assets/` (icon, Android adaptive layers, splash, favicon).
 
+## AI consent
+
+After sign-in, Echo asks once before any recording or text goes to the AI provider (Apple guideline 5.1.2(i)).
+"Continue without AI" keeps journaling fully on-device. It can be changed in Settings → AI; `src/ai.ts` refuses
+AI calls without consent.
+
 ## Freemium
 
 Free: 7 entries/week plus the weekly reflection. Pro: unlimited entries, AI daily prompts, and mood trends.
-Pro is a toggle in Settings that only appears in development builds. Wire it to RevenueCat when you're ready to charge.
+`PAYMENTS_ENABLED` in `src/settings.ts` is `false` until RevenueCat and store products exist: everyone gets all features and no paywall shows (stores reject unpurchasable paywalls).
 
 ## Next before real users
 

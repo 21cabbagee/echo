@@ -7,7 +7,7 @@ import { Button, Card, EntryRow, SectionLabel, ui } from '../components/ui';
 import { dailyPrompt, fallbackPrompt } from '../ai';
 import { Entry, listEntries, weekStart } from '../db';
 import { saveTextEntry, saveVoiceEntry } from '../pipeline';
-import { FREE_ENTRIES_PER_WEEK } from '../settings';
+import { FREE_ENTRIES_PER_WEEK, aiAllowed } from '../settings';
 import { colors } from '../theme';
 
 type Props = {
@@ -35,7 +35,7 @@ export function TodayScreen({ isPro, refreshKey, syncing, onOpenEntry, onChanged
 
   // AI-personalized prompts are a Pro feature; free users get the rotating starter set.
   async function refreshPrompt() {
-    if (!isPro) {
+    if (!isPro || !aiAllowed()) {
       setPrompt(fallbackPrompt(Math.floor(Math.random() * 100)));
       return;
     }
@@ -51,7 +51,7 @@ export function TodayScreen({ isPro, refreshKey, syncing, onOpenEntry, onChanged
 
   const hasEntries = entries.length > 0;
   useEffect(() => {
-    if (!isPro || !hasEntries) return;
+    if (!isPro || !hasEntries || !aiAllowed()) return;
     let alive = true;
     dailyPrompt(entries).then((p) => alive && setPrompt(p)).catch(() => {});
     return () => { alive = false; };
@@ -60,12 +60,12 @@ export function TodayScreen({ isPro, refreshKey, syncing, onOpenEntry, onChanged
   }, [isPro, hasEntries]);
 
   async function onRecorded(uri: string, durationSec: number) {
-    setBusy('Transcribing…');
+    setBusy(aiAllowed() ? 'Transcribing…' : 'Saving…');
     const res = await saveVoiceEntry({ tempUri: uri, durationSec, prompt });
     setBusy(null);
     await load();
     onChanged();
-    if (res.error) {
+    if (res.error && aiAllowed()) {
       Alert.alert('Saved, not transcribed yet', `${res.error}\n\nYour recording is safe and will be transcribed automatically when you're back online.`);
     }
   }

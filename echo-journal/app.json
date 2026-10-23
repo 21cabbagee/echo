@@ -7,8 +7,11 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.echo.journal"
+      "supportsTablet": false,
+      "bundleIdentifier": "in.solution24x7.echo",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +21,13 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.echo.journal"
+      "package": "in.solution24x7.echo",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -48,6 +57,13 @@
         }
       ]
     ],
-    "scheme": "echo"
+    "scheme": "echo",
+    "description": "Voice journal with weekly AI reflections.",
+    "extra": {
+      "eas": {
+        "projectId": "ead7e395-5b69-419a-a835-52fcd6d4253c"
+      }
+    },
+    "owner": "21cabbage"
   }
 }

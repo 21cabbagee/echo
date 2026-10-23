@@ -4,14 +4,14 @@ import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 're
 import { Bullets, Button, Card, SectionLabel, ui } from '../components/ui';
 import { API_URL, checkHealth, deleteAccount } from '../ai';
 import { deleteAllData } from '../db';
-import { FREE_ENTRIES_PER_WEEK, setIsPro } from '../settings';
+import { FREE_ENTRIES_PER_WEEK, PAYMENTS_ENABLED, setAiConsent, setIsPro } from '../settings';
 import { REMINDER_TIMES, ReminderTime, getReminder, setReminder } from '../reminders';
 import { signOut, signOutLocally } from '../supabase';
 import { colors } from '../theme';
 
-type Props = { email: string; isPro: boolean; onChanged: () => void };
+type Props = { email: string; isPro: boolean; aiOn: boolean; onChanged: () => void };
 
-export function SettingsScreen({ email, isPro, onChanged }: Props) {
+export function SettingsScreen({ email, isPro, aiOn, onChanged }: Props) {
   const [online, setOnline] = useState<boolean | null>(null);
 
   async function check() {
@@ -29,6 +29,21 @@ export function SettingsScreen({ email, isPro, onChanged }: Props) {
     if (!ok) {
       Alert.alert('Notifications are off', 'Allow notifications for Expo Go (or Echo) in iOS Settings to get reminders.');
     }
+  }
+
+  function toggleAi(on: boolean) {
+    if (!on) {
+      setAiConsent('declined').then(onChanged);
+      return;
+    }
+    Alert.alert(
+      'Turn on AI features?',
+      'Your recordings and entry text will be sent to Echo’s server and our AI provider, Groq, to transcribe and reflect. They aren’t stored on our server, sold, or used to train AI.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Allow', onPress: () => setAiConsent('granted').then(onChanged) },
+      ],
+    );
   }
 
   function confirmSignOut() {
@@ -128,6 +143,15 @@ export function SettingsScreen({ email, isPro, onChanged }: Props) {
 
       <SectionLabel>AI</SectionLabel>
       <Card style={{ gap: 6 }}>
+        <View style={styles.row}>
+          <Text style={[ui.body, { flex: 1 }]}>AI transcription & reflections</Text>
+          <Switch value={aiOn} onValueChange={toggleAi} trackColor={{ true: colors.accent }} />
+        </View>
+        <Text style={[ui.muted, { marginBottom: 6 }]}>
+          {aiOn
+            ? 'Recordings and text are sent to our AI provider (Groq) only to run these features.'
+            : 'Off: entries are saved on this phone only, without transcripts or reflections.'}
+        </Text>
         <Pressable onPress={check} style={styles.row} hitSlop={6}>
           <View
             style={[
@@ -148,27 +172,31 @@ export function SettingsScreen({ email, isPro, onChanged }: Props) {
         )}
       </Card>
 
-      <SectionLabel>Plan</SectionLabel>
-      <Card style={{ gap: 12 }}>
-        <Text style={ui.h2}>{isPro ? 'Echo Pro' : 'Free'}</Text>
-        <Bullets
-          items={[
-            `Free: ${FREE_ENTRIES_PER_WEEK} entries a week and a weekly reflection`,
-            'Pro ($7/mo): unlimited entries, personalized daily prompts, mood trends',
-          ]}
-        />
-        {/* Until real payments are wired up, Pro can only be toggled in development builds. */}
-        {__DEV__ && (
-          <View style={styles.row}>
-            <Text style={[ui.body, { flex: 1 }]}>Simulate Pro (dev only)</Text>
-            <Switch
-              value={isPro}
-              onValueChange={async (v) => { await setIsPro(v); onChanged(); }}
-              trackColor={{ true: colors.accent }}
+      {PAYMENTS_ENABLED && (
+        <>
+          <SectionLabel>Plan</SectionLabel>
+          <Card style={{ gap: 12 }}>
+            <Text style={ui.h2}>{isPro ? 'Echo Pro' : 'Free'}</Text>
+            <Bullets
+              items={[
+                `Free: ${FREE_ENTRIES_PER_WEEK} entries a week and a weekly reflection`,
+                'Pro ($7/mo): unlimited entries, personalized daily prompts, mood trends',
+              ]}
             />
-          </View>
-        )}
-      </Card>
+            {/* Until real payments are wired up, Pro can only be toggled in development builds. */}
+            {__DEV__ && (
+              <View style={styles.row}>
+                <Text style={[ui.body, { flex: 1 }]}>Simulate Pro (dev only)</Text>
+                <Switch
+                  value={isPro}
+                  onValueChange={async (v) => { await setIsPro(v); onChanged(); }}
+                  trackColor={{ true: colors.accent }}
+                />
+              </View>
+            )}
+          </Card>
+        </>
+      )}
 
       <SectionLabel>Your data</SectionLabel>
       <Card style={{ gap: 12 }}>
